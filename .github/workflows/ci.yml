@@ -15,7 +15,7 @@ jobs:
         uses: actions/setup-java@v2
         with:
           distribution: 'adopt'
-          java-version: '11'
+          java-version: '17'
 
       - name: Build with Gradle
         run: ./gradlew build
@@ -37,7 +37,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.CONTAINER_PACKING_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./build/libs/your-app.jar
-          asset_name: your-app.jar
-          asset_content_type: application/jar
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./build/compose/binaries/main/msi/container_packing.msi
+          asset_name: container_packing.msi
+          asset_content_type: application/x-msi
