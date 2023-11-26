@@ -33,7 +33,7 @@ jobs:
 
       - name: Archive production artifacts
         run: |
-            7z a container_packing.zip ./build/compose
+            7z a container_packing.zip ./composeApp/build/compose
 
       - name: Upload Release Asset
         id: upload-release-asset
