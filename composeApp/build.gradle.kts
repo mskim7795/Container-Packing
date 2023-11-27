@@ -39,6 +39,7 @@ compose.desktop {
         mainClass = "MainKt"
 
         nativeDistributions {
+            modules("java.sql")
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Exe, TargetFormat.Deb)
             packageName = "container_packing"
             packageVersion = "1.0.0"
