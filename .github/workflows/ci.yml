@@ -38,6 +38,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.CONTAINER_PACKING_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./composeApp/build/compose/binaries/main/msi/container_packing-1.0.0.msi
-          asset_name: container_packing.msi
-          asset_content_type: application/x-msi
+          asset_path: ./composeApp/build/compose/binaries/main/exe/container_packing-1.0.0.exe
+          asset_name: container_packing.exe
+          asset_content_type: application/octet-stream
