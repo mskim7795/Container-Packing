@@ -12,19 +12,25 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.material.BottomAppBar
 import androidx.compose.material.Button
 import androidx.compose.material.Checkbox
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -56,7 +62,7 @@ fun showConditionView(screenStack: SnapshotStateList<ScreenView>) {
     val containerStateList = loadContainerStateList()
     val scope = rememberCoroutineScope()
     val scaffoldState = rememberScaffoldState()
-    val cableStateList = remember { mutableStateOf(emptyList<CableState>())}
+    val cableStateMutableList = remember { mutableStateListOf<CableState>() }
     var forceRefresh by remember { mutableStateOf(0) }
     var cableAddingCount = 1
 
@@ -67,11 +73,21 @@ fun showConditionView(screenStack: SnapshotStateList<ScreenView>) {
                 BottomAppBar {
                     Button(
                         onClick = {
-                            cableStateList.value = (cableStateList.value + CableState(
-                                id = cableAddingCount,
-                                name = cableAddingCount.toString()
-                            )).sortedByDescending(CableState::id)
-                            cableAddingCount++
+                            scope.launch {
+                                if (cableStateMutableList.size < 999) {
+                                    cableStateMutableList.add(CableState(
+                                        id = cableAddingCount,
+                                        name = cableAddingCount.toString()
+                                    ))
+                                    cableStateMutableList.sortByDescending(CableState::id)
+                                    cableAddingCount++
+                                } else {
+                                    scaffoldState.snackbarHostState.showSnackbar(
+                                        message = "exceed 999 counts",
+                                        actionLabel = "Go Back"
+                                    )
+                                }
+                            }
                         }
                     ) {
                         Text("Add Cable")
@@ -80,7 +96,7 @@ fun showConditionView(screenStack: SnapshotStateList<ScreenView>) {
                     Button(
                         onClick = {
                             scope.launch {
-                                val cableList = cableStateList.value.map(CableState::toCable)
+                                val cableList = cableStateMutableList.map(CableState::toCable)
                                 if (hasDuplicatedNames(cableList)) {
                                     scaffoldState.snackbarHostState.showSnackbar(
                                         message = "Duplicated Cable Name",
@@ -89,7 +105,7 @@ fun showConditionView(screenStack: SnapshotStateList<ScreenView>) {
                                 } else {
                                     calculateTwoDimensionalPacking(
                                         selectedContainerList.value.map(ContainerState::toContainer),
-                                        cableStateList.value.map(CableState::toCable)
+                                        cableStateMutableList.map(CableState::toCable)
                                     )
                                     screenStack.removeLast()
                                     screenStack.add(ScreenView(Screen.CONTAINER_LIST))
@@ -158,7 +174,7 @@ fun showConditionView(screenStack: SnapshotStateList<ScreenView>) {
                                         OutlinedTextField(
                                             value = item.count.toString(),
                                             onValueChange = { value ->
-                                                if (isNonNegativeInteger(value) && (value.length < 5)) {
+                                                if (isNonNegativeInteger(value) && (value.length < 4)) {
                                                     item.count = value.toIntOrNull() ?: 1
                                                 }
                                             },
@@ -204,6 +220,7 @@ fun showConditionView(screenStack: SnapshotStateList<ScreenView>) {
                         createFieldView(Modifier.weight(1f).border(1.dp, Color.Black), "height(mm)", 10f)
                         createFieldView(Modifier.weight(1f).border(1.dp, Color.Black), "weight(mm)", 10f)
                         createFieldView(Modifier.weight(1f).border(1.dp, Color.Black), "count", 10f)
+                        createFieldView(Modifier.weight(1f).border(1.dp, Color.Black), "delete", 10f)
                     }
 
                     Box(Modifier.fillMaxSize().weight(8f).border(1.dp, Color.Black)) {
@@ -211,7 +228,7 @@ fun showConditionView(screenStack: SnapshotStateList<ScreenView>) {
                             modifier = Modifier.fillMaxSize(),
                             state = lazyCableListState
                         ) {
-                            items(cableStateList.value) { item ->
+                            itemsIndexed(cableStateMutableList) { index, item ->
                                 Row(
                                     Modifier.border(1.dp, Color.Black)
                                 ) {
@@ -235,7 +252,7 @@ fun showConditionView(screenStack: SnapshotStateList<ScreenView>) {
                                         OutlinedTextField(
                                             value = item.width.toString(),
                                             onValueChange = { value ->
-                                                if (isNonNegativeInteger(value) && (value.length < 9)) {
+                                                if (isNonNegativeInteger(value) && (value.length < 6)) {
                                                     item.width = value.toIntOrNull()?: 0
                                                 } else {
                                                     forceRefresh++
@@ -250,7 +267,7 @@ fun showConditionView(screenStack: SnapshotStateList<ScreenView>) {
                                         OutlinedTextField(
                                             value = item.length.toString(),
                                             onValueChange = { value ->
-                                                if (isNonNegativeInteger(value) && (value.length < 9)) {
+                                                if (isNonNegativeInteger(value) && (value.length < 5)) {
                                                     item.length = value.toIntOrNull()?: 0
                                                 } else {
                                                     forceRefresh++
@@ -265,7 +282,7 @@ fun showConditionView(screenStack: SnapshotStateList<ScreenView>) {
                                         OutlinedTextField(
                                             value = item.height.toString(),
                                             onValueChange = { value ->
-                                                if (isNonNegativeInteger(value) && (value.length < 9)) {
+                                                if (isNonNegativeInteger(value) && (value.length < 5)) {
                                                     item.height = value.toIntOrNull()?: 0
                                                 } else {
                                                     forceRefresh++
@@ -280,7 +297,7 @@ fun showConditionView(screenStack: SnapshotStateList<ScreenView>) {
                                         OutlinedTextField(
                                             value = item.weight.toString(),
                                             onValueChange = { value ->
-                                                if (isNonNegativeInteger(value) && (value.length < 9)) {
+                                                if (isNonNegativeInteger(value) && (value.length < 6)) {
                                                     item.weight = value.toIntOrNull()?: 0
                                                 } else {
                                                     forceRefresh++
@@ -295,8 +312,8 @@ fun showConditionView(screenStack: SnapshotStateList<ScreenView>) {
                                         OutlinedTextField(
                                             value = item.count.toString(),
                                             onValueChange = { value ->
-                                                if (isNonNegativeInteger(value) && (value.length < 5)) {
-                                                    item.count = value.toIntOrNull()?: 0
+                                                if (isNonNegativeInteger(value) && (value.length < 4)) {
+                                                    item.count = value.toIntOrNull()?: 1
                                                 } else {
                                                     forceRefresh++
                                                 }
@@ -305,10 +322,16 @@ fun showConditionView(screenStack: SnapshotStateList<ScreenView>) {
                                             modifier = Modifier.fillMaxSize()
                                         )
                                     }
-                                }
 
-                                LaunchedEffect(item) {
-                                    cableStateList.value = (cableStateList.value.filter { it.id != item.id } + item).sortedByDescending(CableState::id)
+                                    Box(Modifier.weight(2f)) {
+                                        IconButton(
+                                            onClick = {
+                                                cableStateMutableList.removeAt(index)
+                                            }
+                                        ) {
+                                            Icon(Icons.Default.Delete, contentDescription = "Delete")
+                                        }
+                                    }
                                 }
                             }
                         }

@@ -17,7 +17,9 @@ import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,6 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.launch
 import model.Screen
 import model.ScreenView
 import service.loadContainerStateList
@@ -34,13 +37,28 @@ import topAppBar
 
 @Composable
 fun loadContainerListView(screenStack: SnapshotStateList<ScreenView>) {
+    val scope = rememberCoroutineScope()
+    val containerStateList = loadContainerStateList()
+    val scaffoldState = rememberScaffoldState()
+
     MaterialTheme {
         Scaffold(
             topBar = { topAppBar(screenStack) },
             bottomBar = {
                 BottomAppBar {
                     Button(
-                        onClick = { screenStack += ScreenView(Screen.NEW_CONTAINER) }
+                        onClick = {
+                            scope.launch {
+                                if (containerStateList.size < 999) {
+                                    screenStack += ScreenView(Screen.NEW_CONTAINER)
+                                } else {
+                                    scaffoldState.snackbarHostState.showSnackbar(
+                                        message = "exceed 999 counts",
+                                        actionLabel = "Go Back"
+                                    )
+                                }
+                            }
+                        }
                     ) {
                         Text("Add")
                     }
@@ -54,7 +72,7 @@ fun loadContainerListView(screenStack: SnapshotStateList<ScreenView>) {
                     modifier = Modifier.fillMaxSize().height(56.dp),
                     state = listState
                 ) {
-                    items(loadContainerStateList()) {item ->
+                    items(containerStateList) {item ->
                         Row(
                             modifier = Modifier
                                 .border(1.dp, Color.Black)

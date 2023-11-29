@@ -175,7 +175,7 @@ fun loadContainerInfoView(screenStack: SnapshotStateList<ScreenView>) {
                             OutlinedTextField(
                                 value = containerState.width.toString(),
                                 onValueChange = {value ->
-                                    errorMap[text] = !isNonNegativeInteger(value) || (value.length > 10)
+                                    errorMap[text] = !isNonNegativeInteger(value) || (value.length > 5)
                                     if (errorMap[text] != true) {
                                         containerState.width = value.toIntOrNull() ?: 0
                                     }
@@ -201,7 +201,7 @@ fun loadContainerInfoView(screenStack: SnapshotStateList<ScreenView>) {
                             OutlinedTextField(
                                 value = containerState.length.toString(),
                                 onValueChange = {value ->
-                                    errorMap[text] = !isNonNegativeInteger(value) || (value.length > 10)
+                                    errorMap[text] = !isNonNegativeInteger(value) || (value.length > 4)
                                     if (errorMap[text] != true) {
                                         containerState.length = value.toIntOrNull() ?: 0
                                     }
@@ -227,7 +227,7 @@ fun loadContainerInfoView(screenStack: SnapshotStateList<ScreenView>) {
                             OutlinedTextField(
                                 value = containerState.height.toString(),
                                 onValueChange = {value ->
-                                    errorMap[text] = !isNonNegativeInteger(value) || (value.length > 10)
+                                    errorMap[text] = !isNonNegativeInteger(value) || (value.length > 4)
                                     if (errorMap[text] != true) {
                                         containerState.height = value.toIntOrNull() ?: 0
                                     }
@@ -253,7 +253,7 @@ fun loadContainerInfoView(screenStack: SnapshotStateList<ScreenView>) {
                             OutlinedTextField(
                                 value = containerState.weight.toString(),
                                 onValueChange = {value ->
-                                    errorMap[text] = !isNonNegativeInteger(value) || (value.length > 10)
+                                    errorMap[text] = !isNonNegativeInteger(value) || (value.length > 5)
                                     if (errorMap[text] != true) {
                                         containerState.weight = value.toIntOrNull() ?: 0
                                     }
@@ -279,7 +279,7 @@ fun loadContainerInfoView(screenStack: SnapshotStateList<ScreenView>) {
                             OutlinedTextField(
                                 value = containerState.cost.toString(),
                                 onValueChange = {value ->
-                                    errorMap[text] = !isNonNegativeInteger(value) || (value.length > 10)
+                                    errorMap[text] = !isNonNegativeInteger(value) || (value.length > 5)
                                     if (errorMap[text] != true) {
                                         containerState.cost = value.toIntOrNull() ?: 0
                                     }
