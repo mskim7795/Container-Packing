@@ -9,4 +9,5 @@ data class Cable(
     val weight: Int = 0,
     val count: Int = 1,
     val createdTime: Long
-)
+) {
+}
