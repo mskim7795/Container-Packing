@@ -52,12 +52,13 @@ import model.view.ContainerState
 import service.calculateTwoDimensionalPacking
 import service.hasDuplicatedNames
 import service.loadContainerStateList
+import service.saveResult
 import topAppBar
 import view.createFieldView
 import view.isNonNegativeInteger
 
 @Composable
-fun showConditionView(screenStack: SnapshotStateList<ScreenView>) {
+fun createNewConditionView(screenStack: SnapshotStateList<ScreenView>) {
     val selectedContainerList = remember { mutableStateOf(emptyList<ContainerState>()) }
     val containerStateList = loadContainerStateList()
     val scope = rememberCoroutineScope()
@@ -103,12 +104,15 @@ fun showConditionView(screenStack: SnapshotStateList<ScreenView>) {
                                         actionLabel = "Go Back"
                                     )
                                 } else {
-                                    calculateTwoDimensionalPacking(
+                                    val result = calculateTwoDimensionalPacking(
                                         selectedContainerList.value.map(ContainerState::toContainer),
                                         cableStateMutableList.map(CableState::toCable)
                                     )
-                                    screenStack.removeLast()
-                                    screenStack.add(ScreenView(Screen.CONTAINER_LIST))
+                                    saveResult(result)
+                                    screenStack.clear()
+                                    screenStack.add(ScreenView(Screen.INDEX))
+                                    screenStack.add(ScreenView(Screen.RESULT_LIST))
+                                    screenStack.add(ScreenView(Screen.RESULT_INFO, result.name))
                                 }
                             }
                         }
@@ -143,8 +147,7 @@ fun showConditionView(screenStack: SnapshotStateList<ScreenView>) {
                             modifier = Modifier.fillMaxSize(),
                             state = lazyContainerListState
                         ) {
-                            items(containerList) { item ->
-                                val isSelected = remember { mutableStateOf(false) }
+                            items(containerList) { containerState ->
 
                                 Row(
                                     modifier = Modifier
@@ -153,15 +156,15 @@ fun showConditionView(screenStack: SnapshotStateList<ScreenView>) {
                                 ) {
                                     Box(modifier = Modifier.weight(1f).height(56.dp).border(1.dp, Color.Black)) {
                                         Checkbox(
-                                            checked = isSelected.value,
-                                            onCheckedChange = { isSelected.value = it },
+                                            checked = containerState.isSelected,
+                                            onCheckedChange = { containerState.isSelected = it },
                                             modifier = Modifier.fillMaxSize()
                                         )
                                     }
 
                                     Box(modifier = Modifier.height(56.dp).weight(6f).border(1.dp, Color.Black)) {
                                         Text(
-                                            text = AnnotatedString(item.name),
+                                            text = AnnotatedString(containerState.name),
                                             fontSize = 25.sp,
                                             fontWeight = FontWeight.Bold,
                                             modifier = Modifier.fillMaxSize(),
@@ -172,24 +175,24 @@ fun showConditionView(screenStack: SnapshotStateList<ScreenView>) {
 
                                     Box(modifier = Modifier.weight(1f).border(1.dp, Color.Black)) {
                                         OutlinedTextField(
-                                            value = item.count.toString(),
+                                            value = containerState.count.toString(),
                                             onValueChange = { value ->
                                                 if (isNonNegativeInteger(value) && (value.length < 4)) {
-                                                    item.count = value.toIntOrNull() ?: 1
+                                                    containerState.count = value.toIntOrNull() ?: 1
                                                 }
                                             },
                                             singleLine = true,
                                             modifier = Modifier.fillMaxSize(),
-                                            enabled = isSelected.value
+                                            enabled = containerState.isSelected
                                         )
                                     }
                                 }
 
-                                LaunchedEffect(isSelected, item.count) {
-                                    if (isSelected.value) {
-                                        selectedContainerList.value = selectedContainerList.value.filter { it.name != item.name } + item
+                                LaunchedEffect(containerState.isSelected, containerState.count) {
+                                    if (containerState.isSelected) {
+                                        selectedContainerList.value = selectedContainerList.value.filter { it.name != containerState.name } + containerState
                                     } else {
-                                        selectedContainerList.value = selectedContainerList.value.filter { it.name != item.name }
+                                        selectedContainerList.value = selectedContainerList.value.filter { it.name != containerState.name }
                                     }
                                 }
                             }

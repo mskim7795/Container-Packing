@@ -37,6 +37,13 @@ fun loadIndexView(screenStack: SnapshotStateList<ScreenView>) {
             ) {
                 Text(Screen.NEW_CONDITION.id)
             }
+
+            Button(
+                onClick = { screenStack += ScreenView(Screen.RESULT_LIST) },
+                modifier = Modifier.fillMaxWidth().height(56.dp).border(1.dp, Color.Black)
+            ) {
+                Text(Screen.RESULT_LIST.id)
+            }
         }
     }
 }

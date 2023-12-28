@@ -13,6 +13,7 @@ class ContainerState (
     weight: Int = 0,
     cost: Int = 0,
     count: Int = 1,
+    isSelected: Boolean = false
 ) {
     var name by mutableStateOf(name)
     var width by mutableStateOf(width)
@@ -21,6 +22,7 @@ class ContainerState (
     var weight by mutableStateOf(weight)
     var cost by mutableStateOf(cost)
     var count by mutableStateOf(count)
+    var isSelected by mutableStateOf(isSelected)
 
     companion object {
         fun create(container: Container): ContainerState {

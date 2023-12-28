@@ -31,7 +31,7 @@ fun convertToDetailedContainerList(containerList: List<Container>): List<Detaile
             }
             newContainerList
     }.map {container ->
-        val areaSortedSet = TreeSet<Rectangle> { o1, o2 -> o1.getArea() - o2.getArea() }
+        val areaSortedSet = TreeSet<Rectangle>()
         areaSortedSet.add(createNewFreeRectangle(container))
         DetailedContainer(
             container = container,
