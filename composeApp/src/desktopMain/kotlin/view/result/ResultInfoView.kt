@@ -24,6 +24,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -125,8 +126,12 @@ fun loadResultInfoView(screenStack: SnapshotStateList<ScreenView>) {
                                 resultState.name = it
                             }
                         },
+                        textStyle = TextStyle(
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold
+                        ),
                         readOnly = !canEdit,
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier.fillMaxSize().background(Color.Yellow)
                     )
                 }
 
@@ -141,6 +146,7 @@ fun loadResultInfoView(screenStack: SnapshotStateList<ScreenView>) {
                             modifier = Modifier
                                 .border(1.dp, Color.Black)
                                 .clickable { expanded = !expanded }
+                                .background(Color.Cyan)
                         ) {
                             Text(
                                 text = AnnotatedString(container.name),
@@ -160,7 +166,7 @@ fun loadResultInfoView(screenStack: SnapshotStateList<ScreenView>) {
 
                 Row(
                     modifier = Modifier.weight(1f)
-                        .border(1.dp, Color.Black)
+                        .border(1.dp, Color.Black).background(Color.Gray)
                 ) {
                     Text(
                         text = "Remained Cable",
