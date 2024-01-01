@@ -2,8 +2,11 @@ package service
 
 import model.*
 import model.Result
+import org.slf4j.LoggerFactory
 import util.convertTimeToString
 import java.time.LocalDateTime
+
+private val logger = LoggerFactory.getLogger("PackingService")
 
 fun calculateTwoDimensionalPacking(containerList: List<Container>, cableList: List<Cable>): Result {
     val sortedCableList = cableList.sortedByDescending { cable -> cable.width * cable.length }
@@ -43,7 +46,7 @@ private fun splitFreeRectangle(freeRectangle: Rectangle, usedRectangle: Rectangl
         val rectangle = Rectangle(
             x = usedRectangle.x + usedRectangle.width,
             y = freeRectangle.y,
-            width = freeRectangle.width,
+            width = freeRectangle.width - (usedRectangle.x - freeRectangle.x) - usedRectangle.width,
             length = freeRectangle.length
         )
         newRectangles.add(rectangle)
@@ -66,7 +69,7 @@ private fun splitFreeRectangle(freeRectangle: Rectangle, usedRectangle: Rectangl
             x = freeRectangle.x,
             y = usedRectangle.y + usedRectangle.length,
             width = freeRectangle.width,
-            length = freeRectangle.length
+            length = freeRectangle.length - (usedRectangle.y - freeRectangle.y) - usedRectangle.length
         )
         newRectangles.add(rectangle)
     }
@@ -103,29 +106,23 @@ private fun addCableIntoContainer(cable: Cable, detailedContainerList: List<Deta
 private fun addCableIntoContainerInternal(cable: Cable, detailedContainer: DetailedContainer): Boolean {
     val cableRectangle = convertFromCableToRectangle(cable)
     val freeRectangleSet = detailedContainer.freeRectangleSet
-    val addedRectangleSet = mutableSetOf<Rectangle>()
-    val removedRectangleSet = mutableSetOf<Rectangle>()
-    var canSetCable = false
-    freeRectangleSet.filter { freeRectangle ->
+    return freeRectangleSet.firstOrNull { freeRectangle ->
         val canPutRectangleInto = canPutRectangleInto(cableRectangle, freeRectangle)
         if (canPutRectangleInto) {
-            canSetCable = true;
+            cableRectangle.x = freeRectangle.x
+            cableRectangle.y = freeRectangle.y
         }
         canPutRectangleInto
-    }.forEach {
-        addedRectangleSet.addAll(splitFreeRectangle(it, cableRectangle))
-        removedRectangleSet.add(it)
-    }
-    return if (canSetCable) {
-        freeRectangleSet.addAll(addedRectangleSet)
-        freeRectangleSet.removeAll(removedRectangleSet)
+    }?.let {
+        logger.info("cableRectangle: {}", cableRectangle)
+        freeRectangleSet.addAll(splitFreeRectangle(it, cableRectangle))
+        freeRectangleSet.remove(it)
+        logger.info("freeRectangleSet: {}", freeRectangleSet)
         addSimpleCable(cable, detailedContainer.simpleCableList)
         detailedContainer.totalWeight += cable.weight
         detailedContainer.usedRectangleList += cableRectangle
         true
-    } else {
-        false
-    }
+    }?: false
 }
 
 private fun addSimpleCable(cable: Cable, simpleCableList: MutableList<SimpleCable>) {

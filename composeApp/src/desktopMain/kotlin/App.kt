@@ -8,7 +8,7 @@ import model.Screen
 import model.ScreenView
 import util.initializeRootFolder
 import view.container.loadContainerListView
-import view.container.createNewConditionView
+import view.condition.createNewConditionView
 import view.loadIndexView
 import view.container.loadContainerInfoView
 import view.container.saveContainerView
