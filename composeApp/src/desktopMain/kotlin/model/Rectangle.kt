@@ -14,7 +14,11 @@ data class Rectangle(
         return when {
             getArea() < other.getArea() -> -1
             getArea() > other.getArea() -> 1
-            else -> 0
+            else -> when {
+                x.toLong() * y < other.x.toLong() * other.y -> -1
+                x.toLong() * y > other.x.toLong() * other.y -> 1
+                else -> 0
+            }
         }
     }
 }
