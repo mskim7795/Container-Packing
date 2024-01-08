@@ -24,7 +24,9 @@ fun calculateTwoDimensionalPacking(containerList: List<Container>, cableList: Li
     }
     return Result(
         name = convertTimeToString(LocalDateTime.now()),
-        detailedContainerList = detailedContainerList,
+        detailedContainerList = detailedContainerList.filter { detailedContainer ->
+            detailedContainer.simpleCableList.size > 0
+        },
         remainedCableList = remainedCableList
     )
 }
