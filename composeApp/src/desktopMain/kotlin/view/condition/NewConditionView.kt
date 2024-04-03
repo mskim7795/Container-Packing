@@ -51,7 +51,7 @@ import model.view.CableState
 import model.view.ContainerState
 import service.calculateTwoDimensionalPacking
 import service.hasDuplicatedNames
-import service.loadContainerStateList
+import service.findContainerList
 import service.saveResult
 import topAppBar
 import view.createFieldView
@@ -60,7 +60,7 @@ import view.isNonNegativeInteger
 @Composable
 fun createNewConditionView(screenStack: SnapshotStateList<ScreenView>) {
     val selectedContainerList = remember { mutableStateOf(emptyList<ContainerState>()) }
-    val containerStateList = loadContainerStateList()
+    val containerStateList = findContainerList()
     val scope = rememberCoroutineScope()
     val scaffoldState = rememberScaffoldState()
     val cableStateMutableList = remember { mutableStateListOf<CableState>() }
@@ -112,7 +112,7 @@ fun createNewConditionView(screenStack: SnapshotStateList<ScreenView>) {
                                     screenStack.clear()
                                     screenStack.add(ScreenView(Screen.INDEX))
                                     screenStack.add(ScreenView(Screen.RESULT_LIST))
-                                    screenStack.add(ScreenView(Screen.RESULT_INFO, result.name))
+                                    screenStack.add(ScreenView(Screen.RESULT_INFO, result.id.toString()))
                                 }
                             }
                         }
@@ -170,20 +170,6 @@ fun createNewConditionView(screenStack: SnapshotStateList<ScreenView>) {
                                             modifier = Modifier.fillMaxSize(),
                                             maxLines = 1,
                                             overflow = TextOverflow.Ellipsis
-                                        )
-                                    }
-
-                                    Box(modifier = Modifier.weight(1f).border(1.dp, Color.Black)) {
-                                        OutlinedTextField(
-                                            value = containerState.count.toString(),
-                                            onValueChange = { value ->
-                                                if (isNonNegativeInteger(value) && (value.length < 4)) {
-                                                    containerState.count = value.toIntOrNull() ?: 1
-                                                }
-                                            },
-                                            singleLine = true,
-                                            modifier = Modifier.fillMaxSize(),
-                                            enabled = containerState.isSelected
                                         )
                                     }
                                 }

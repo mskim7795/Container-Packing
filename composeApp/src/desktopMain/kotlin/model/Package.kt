@@ -1,7 +1,7 @@
 package model
 
 enum class Package(val id: String) {
-    CONTAINER("container"),
-    CABLE("cable"),
-    RESULT("result")
+    CONTAINER("CONTAINER"),
+    CABLE("CABLE"),
+    RESULT("RESULT")
 }

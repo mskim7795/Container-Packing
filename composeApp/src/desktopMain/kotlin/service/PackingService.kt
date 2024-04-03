@@ -13,22 +13,17 @@ private val logger = LoggerFactory.getLogger("PackingService")
 
 fun calculateTwoDimensionalPacking(containerList: List<Container>, cableList: List<Cable>): Result {
     val sortedCableList = cableList.sortedByDescending { cable -> cable.width * cable.length }
-    val detailedContainerList = convertToDetailedContainerList(containerList)
+    val sortedContainerList = containerList.sortedByDescending { container -> container.getAreaPerCost() }
+    val detailedContainerList = mutableListOf<DetailedContainer>()
     val remainedCableList = mutableListOf<SimpleCable>()
     sortedCableList.forEach {cable ->
         for (i: Int in 1..cable.count) {
-            if(!addCableIntoContainer(cable, detailedContainerList)) {
+            if(!addCableIntoContainer(cable, detailedContainerList, sortedContainerList)) {
                 addSimpleCable(cable, remainedCableList)
             }
         }
     }
-    return Result(
-        name = convertTimeToString(LocalDateTime.now()),
-        detailedContainerList = detailedContainerList.filter { detailedContainer ->
-            detailedContainer.simpleCableList.size > 0
-        },
-        remainedCableList = remainedCableList
-    )
+    return createResult(detailedContainerList, remainedCableList, cableList)
 }
 
 private fun splitFreeRectangle(freeRectangle: Rectangle, usedRectangle: Rectangle): List<Rectangle> {
@@ -112,7 +107,8 @@ private fun compressRectangle(freeRectangleSet: TreeSet<Rectangle>): TreeSet<Rec
 }
 
 
-private fun addCableIntoContainer(cable: Cable, detailedContainerList: List<DetailedContainer>): Boolean {
+private fun addCableIntoContainer(
+    cable: Cable, detailedContainerList: MutableList<DetailedContainer>, containerList: List<Container>): Boolean {
     for (i: Int in detailedContainerList.indices) {
         val detailedContainer = detailedContainerList[i]
 
@@ -125,7 +121,38 @@ private fun addCableIntoContainer(cable: Cable, detailedContainerList: List<Deta
         }
     }
 
+    if (canPutCableInContainerAndAddIt(detailedContainerList, containerList, cable)) {
+        return true;
+    }
+
     return false;
+}
+
+fun canPutCableInContainerAndAddIt(
+    detailedContainerList: MutableList<DetailedContainer>, containerList: List<Container>, cable: Cable): Boolean {
+
+    for (i: Int in containerList.indices) {
+        val container = containerList[i]
+        val areaSortedSet = TreeSet<Rectangle>()
+        areaSortedSet.add(createNewFreeRectangle(container))
+        val detailedContainer = DetailedContainer(
+            container,
+            0,
+            mutableListOf(),
+            mutableListOf(),
+            areaSortedSet
+        )
+
+        if (!checkHeight(cable, detailedContainer) || !checkWeight(cable, detailedContainer)) {
+            continue
+        }
+
+        if(addCableIntoContainerInternal(cable, detailedContainer)) {
+            detailedContainerList.add(detailedContainer)
+            return true;
+        }
+    }
+    return false
 }
 
 fun remainArea(cableRectangle: Rectangle, freeRectangle: Rectangle): Long {

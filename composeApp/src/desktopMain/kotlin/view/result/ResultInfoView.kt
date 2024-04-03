@@ -31,16 +31,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import model.ScreenView
-import model.view.DetailedContainerState
 import model.view.SimpleCableState
 import service.deleteResult
 import service.loadResultState
 import service.updateResultName
 import topAppBar
+import java.util.UUID
 
 @Composable
 fun loadResultInfoView(screenStack: SnapshotStateList<ScreenView>) {
-    val resultState = remember { loadResultState(screenStack.last().itemName) }
+    val resultState = remember { loadResultState(UUID.fromString(screenStack.last().itemId)) }
     val scaffoldState = rememberScaffoldState()
     val scope = rememberCoroutineScope()
     var canEdit by remember { mutableStateOf(false) }
@@ -54,7 +54,7 @@ fun loadResultInfoView(screenStack: SnapshotStateList<ScreenView>) {
                         onClick = {
                             scope.launch {
                                 try {
-                                    if(updateResultName(screenStack.last().itemName, resultState.name)) {
+                                    if(updateResultName(resultState.id, resultState.name)) {
                                         scaffoldState.snackbarHostState.showSnackbar(
                                             message = "Update succeeded",
                                             actionLabel = "OK"
@@ -86,7 +86,7 @@ fun loadResultInfoView(screenStack: SnapshotStateList<ScreenView>) {
                         onClick = {
                             scope.launch {
                                 try {
-                                    if(deleteResult(resultState.name)) {
+                                    if(deleteResult(resultState.id)) {
                                         scaffoldState.snackbarHostState.showSnackbar(
                                             message = "Delete succeeded",
                                             actionLabel = "OK",

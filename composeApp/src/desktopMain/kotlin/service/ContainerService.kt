@@ -1,16 +1,19 @@
 package service
 
+import Repository.findContainerById
+import Repository.findContainerList
+import Repository.upsertContainer
 import model.Container
 import model.DetailedContainer
 import model.Package
 import model.Rectangle
 import model.view.ContainerState
-import util.deleteItem
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import util.loadItem
-import util.loadItemList
-import util.saveItem
-import util.updateItem
 import java.util.*
+
+private val logger: Logger = LoggerFactory.getLogger("ContainerService")
 
 fun convertToDetailedContainerList(containerList: List<Container>): List<DetailedContainer> {
     return containerList.flatMap {container ->
@@ -18,6 +21,7 @@ fun convertToDetailedContainerList(containerList: List<Container>): List<Detaile
             for (i: Int in 1..container.count) {
                 newContainerList.add(
                     Container(
+                        id = UUID.randomUUID(),
                         name = container.name,
                         width = container.width,
                         length = container.length,
@@ -43,24 +47,28 @@ fun convertToDetailedContainerList(containerList: List<Container>): List<Detaile
     }.sortedBy { detailedContainer -> detailedContainer.container.cost }
 }
 
-fun loadContainerStateList(): List<ContainerState> {
-    return loadItemList<Container>(Package.CONTAINER)
+fun findContainerList(): List<ContainerState> {
+    return findContainerList()
         .sortedByDescending { it.createdTime }
         .map(ContainerState.Companion::create)
 }
 
-fun loadContainerState(name: String): ContainerState {
+fun findContainerState(name: String): ContainerState {
     return ContainerState.create(loadItem<Container>(Package.CONTAINER, name))
 }
 
 fun updateContainer(container: Container): Boolean {
-    return updateItem(Package.CONTAINER, container, container.name)
+    upsertContainer(container)
+    return true
 }
 
 fun saveContainer(container: Container): Boolean {
-    return saveItem(Package.CONTAINER, container, container.name)
+    upsertContainer(container)
+    return true
 }
 
-fun deleteContainer(container: Container): Boolean {
-    return deleteItem(Package.CONTAINER, container.name)
+fun deleteContainer(id: UUID): Boolean {
+    val container = findContainerById(id)
+    Repository.deleteContainer(container)
+    return true
 }

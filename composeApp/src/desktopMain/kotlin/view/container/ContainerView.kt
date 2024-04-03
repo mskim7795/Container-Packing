@@ -32,7 +32,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import model.ScreenView
 import service.deleteContainer
-import service.loadContainerState
+import service.findContainerState
 import service.updateContainer
 import topAppBar
 import view.createFieldView
@@ -42,9 +42,9 @@ import java.lang.Exception
 
 @Composable
 fun loadContainerInfoView(screenStack: SnapshotStateList<ScreenView>) {
-    val containerName = screenStack.last().itemName
+    val containerName = screenStack.last().itemId
     val containerState = remember {
-        loadContainerState(containerName)
+        findContainerState(containerName)
     }
     val scaffoldState = rememberScaffoldState()
     val scope = rememberCoroutineScope()
@@ -98,7 +98,7 @@ fun loadContainerInfoView(screenStack: SnapshotStateList<ScreenView>) {
                         onClick = {
                             scope.launch {
                                 try {
-                                    if(deleteContainer(containerState.toContainer())) {
+                                    if(deleteContainer(containerState.id)) {
                                         scaffoldState.snackbarHostState.showSnackbar(
                                             message = "Delete succeeded",
                                             actionLabel = "OK",

@@ -1,38 +1,66 @@
 package service
 
+import Repository.deleteResult
+import Repository.findResult
+import Repository.findResultById
+import Repository.upsertResult
+import model.Cable
+import model.DetailedContainer
 import model.Result
 import model.Package
+import model.SimpleCable
+import model.SimpleContainerInfo
 import model.view.ResultState
-import util.deleteItem
+import util.convertTimeToString
 import util.loadItem
-import util.loadItemList
-import util.saveItem
-import util.updateItem
+import java.time.LocalDateTime
+import java.util.UUID
 
 fun loadResultStateList(): List<ResultState> {
-    return loadItemList<Result>(Package.RESULT)
+    return findResult()
         .sortedByDescending { it.name }
         .map(ResultState.Companion::create)
 }
 
-fun loadResultState(name: String): ResultState {
-    return ResultState.create(loadItem<Result>(Package.RESULT, name))
+fun loadResultState(id: UUID): ResultState {
+    return ResultState.create(findResultById(id))
 }
 
-fun updateResultName(prevName:String, name: String): Boolean {
-    val result = loadItem<Result>(Package.RESULT, prevName)
-    val newResult = Result(
-        name = name,
-        detailedContainerList = result.detailedContainerList,
-        remainedCableList = result.remainedCableList
-    )
-    return updateItem(Package.RESULT, newResult, newResult.name)
+fun updateResultName(id: UUID, name: String): Boolean {
+    val result = findResultById(id)
+    result.name = name
+    upsertResult(result)
+    return true
 }
 
 fun saveResult(result: Result): Boolean {
-    return saveItem(Package.RESULT, result, result.name)
+    upsertResult(result)
+    return true
 }
 
-fun deleteResult(name: String): Boolean {
-    return deleteItem(Package.RESULT, name)
+fun deleteResult(id: UUID): Boolean {
+    val result = findResultById(id)
+    deleteResult(result)
+    return true
+}
+
+fun createResult(detailedContainerList: List<DetailedContainer>, remainedCableList: List<SimpleCable>, cableList: List<Cable>): Result {
+    val simpleContainerInfoList = detailedContainerList.groupBy { detailedContainer ->
+        detailedContainer.container.name
+    }.map { entry ->
+        SimpleContainerInfo(
+            name = entry.key,
+            count = entry.value.size,
+            container = entry.value[0].container
+        )
+    }
+
+    return Result(
+        id = UUID.randomUUID(),
+        name = convertTimeToString(LocalDateTime.now()),
+        detailedContainerList = detailedContainerList,
+        remainedCableList = remainedCableList,
+        simpleContainerInfoList = simpleContainerInfoList,
+        cableList = cableList
+    )
 }

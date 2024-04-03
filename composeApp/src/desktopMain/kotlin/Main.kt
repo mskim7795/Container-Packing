@@ -15,6 +15,7 @@ fun main() = application {
             height = 720.dp
         ),
     ) {
+
         app()
     }
 }

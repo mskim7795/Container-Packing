@@ -4,8 +4,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import model.Container
+import java.util.*
 
 class ContainerState (
+    id: UUID = UUID.randomUUID(),
     name: String = "",
     width: Int = 0,
     length: Int = 0,
@@ -15,6 +17,7 @@ class ContainerState (
     count: Int = 1,
     isSelected: Boolean = false
 ) {
+    var id by mutableStateOf(id)
     var name by mutableStateOf(name)
     var width by mutableStateOf(width)
     var length by mutableStateOf(length)
@@ -27,6 +30,7 @@ class ContainerState (
     companion object {
         fun create(container: Container): ContainerState {
             return ContainerState(
+                id = container.id,
                 name = container.name,
                 width = container.width,
                 length = container.length,
@@ -39,6 +43,7 @@ class ContainerState (
 
     fun toContainer(): Container {
         return Container(
+            id = UUID.randomUUID(),
             name = name,
             width = width,
             length = length,

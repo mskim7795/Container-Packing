@@ -32,13 +32,13 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import model.Screen
 import model.ScreenView
-import service.loadContainerStateList
+import service.findContainerList
 import topAppBar
 
 @Composable
 fun loadContainerListView(screenStack: SnapshotStateList<ScreenView>) {
     val scope = rememberCoroutineScope()
-    val containerStateList = loadContainerStateList()
+    val containerStateList = findContainerList()
     val scaffoldState = rememberScaffoldState()
 
     MaterialTheme {
@@ -76,7 +76,7 @@ fun loadContainerListView(screenStack: SnapshotStateList<ScreenView>) {
                         Row(
                             modifier = Modifier
                                 .border(1.dp, Color.Black)
-                                .clickable { screenStack += ScreenView(Screen.CONTAINER_INFO, item.name) }
+                                .clickable { screenStack += ScreenView(Screen.CONTAINER_INFO, item.id.toString()) }
                         ) {
                             Text(
                                 text = AnnotatedString(item.name),

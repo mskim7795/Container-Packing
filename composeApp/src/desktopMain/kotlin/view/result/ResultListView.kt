@@ -52,7 +52,7 @@ fun loadResultListView(screenStack: SnapshotStateList<ScreenView>) {
                         Row(
                             modifier = Modifier
                                 .border(1.dp, Color.Black)
-                                .clickable { screenStack += ScreenView(Screen.RESULT_INFO, item.name) }
+                                .clickable { screenStack += ScreenView(Screen.RESULT_INFO, item.id.toString()) }
                         ) {
                             Text(
                                 text = AnnotatedString(item.name),
