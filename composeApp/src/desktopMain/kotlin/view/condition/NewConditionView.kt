@@ -56,6 +56,7 @@ import service.saveResult
 import topAppBar
 import view.createFieldView
 import view.isNonNegativeInteger
+import java.util.UUID
 
 @Composable
 fun createNewConditionView(screenStack: SnapshotStateList<ScreenView>) {
@@ -77,7 +78,7 @@ fun createNewConditionView(screenStack: SnapshotStateList<ScreenView>) {
                             scope.launch {
                                 if (cableStateMutableList.size < 999) {
                                     cableStateMutableList.add(CableState(
-                                        id = cableAddingCount,
+                                        id = UUID.randomUUID().toString(),
                                         name = cableAddingCount.toString()
                                     ))
                                     cableStateMutableList.sortByDescending(CableState::id)

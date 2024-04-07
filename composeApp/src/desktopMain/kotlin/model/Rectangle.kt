@@ -34,19 +34,19 @@ data class Rectangle(
 
         override fun fromDocument(document: Document, nitriteMapper: NitriteMapper): Rectangle {
             return Rectangle(
-                x = document.get("x", Int::class.java),
-                y = document.get("y", Int::class.java),
-                width = document.get("width", Int::class.java),
-                length = document.get("length", Int::class.java)
+                x = document.get("x", String::class.java).toInt(),
+                y = document.get("y", String::class.java).toInt(),
+                width = document.get("width", String::class.java).toInt(),
+                length = document.get("length", String::class.java).toInt()
             )
         }
 
         override fun toDocument(rectangle: Rectangle, nitriteMapper: NitriteMapper): Document {
             return documentOf(
-                "x" to rectangle.x,
-                "y" to rectangle.y,
-                "width" to rectangle.width,
-                "length" to rectangle.length
+                "x" to rectangle.x.toString(),
+                "y" to rectangle.y.toString(),
+                "width" to rectangle.width.toString(),
+                "length" to rectangle.length.toString()
             )
         }
 

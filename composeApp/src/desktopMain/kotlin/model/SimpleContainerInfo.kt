@@ -22,7 +22,7 @@ data class SimpleContainerInfo(
             ) as Container
             return SimpleContainerInfo(
                 name = document.get("name", String::class.java),
-                count = document.get("count", Int::class.java),
+                count = document.get("count", String::class.java).toInt(),
                 container = container
             )
         }
@@ -31,7 +31,7 @@ data class SimpleContainerInfo(
             val container = nitriteMapper.tryConvert(simpleContainerInfo.container, Document::class.java) as Document
             return documentOf(
                 "name" to simpleContainerInfo.name,
-                "count" to simpleContainerInfo.count,
+                "count" to simpleContainerInfo.count.toString(),
                 "container" to container
             )
         }

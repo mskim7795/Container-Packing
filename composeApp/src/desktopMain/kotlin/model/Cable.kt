@@ -4,15 +4,16 @@ import org.dizitart.kno2.documentOf
 import org.dizitart.no2.collection.Document
 import org.dizitart.no2.common.mapper.EntityConverter
 import org.dizitart.no2.common.mapper.NitriteMapper
+import java.util.UUID
 
 data class Cable(
-    val id: Int = -1,
-    val name: String = "",
-    val width: Int = 0,
-    val length: Int = 0,
-    val height: Int = 0,
-    val weight: Int = 0,
-    val count: Int = 1,
+    val id: String,
+    val name: String,
+    val width: Int,
+    val length: Int,
+    val height: Int,
+    val weight: Int,
+    val count: Int,
     val createdTime: Long
 ) {
     companion object Converter: EntityConverter<Cable> {
@@ -22,14 +23,14 @@ data class Cable(
 
         override fun fromDocument(document: Document, nitriteMapper: NitriteMapper): Cable {
             return Cable(
-                id = document.get("id", Int::class.java),
+                id = document.get("id", String::class.java),
                 name = document.get("name", String::class.java),
-                width = document.get("width", Int::class.java),
-                length = document.get("length", Int::class.java),
-                height = document.get("height", Int::class.java),
-                weight = document.get("weight", Int::class.java),
-                count = document.get("count", Int::class.java),
-                createdTime = document.get("createdTime", Long::class.java),
+                width = document.get("width", String::class.java).toInt(),
+                length = document.get("length", String::class.java).toInt(),
+                height = document.get("height", String::class.java).toInt(),
+                weight = document.get("weight", String::class.java).toInt(),
+                count = document.get("count", String::class.java).toInt(),
+                createdTime = document.get("createdTime", String::class.java).toLong(),
             )
         }
 
@@ -37,12 +38,12 @@ data class Cable(
             return documentOf(
                 "id" to cable.id,
                 "name" to cable.name,
-                "width" to cable.width,
-                "length" to cable.length,
-                "height" to cable.height,
-                "weight" to cable.weight,
-                "count" to cable.count,
-                "createdTime" to cable.createdTime
+                "width" to cable.width.toString(),
+                "length" to cable.length.toString(),
+                "height" to cable.height.toString(),
+                "weight" to cable.weight.toString(),
+                "count" to cable.count.toString(),
+                "createdTime" to cable.createdTime.toString()
             )
         }
 

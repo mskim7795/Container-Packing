@@ -4,12 +4,7 @@ import Repository.deleteResult
 import Repository.findResult
 import Repository.findResultById
 import Repository.upsertResult
-import model.Cable
-import model.DetailedContainer
-import model.Result
-import model.Package
-import model.SimpleCable
-import model.SimpleContainerInfo
+import model.*
 import model.view.ResultState
 import util.convertTimeToString
 import util.loadItem
@@ -22,11 +17,11 @@ fun loadResultStateList(): List<ResultState> {
         .map(ResultState.Companion::create)
 }
 
-fun loadResultState(id: UUID): ResultState {
+fun loadResultState(id: String): ResultState {
     return ResultState.create(findResultById(id))
 }
 
-fun updateResultName(id: UUID, name: String): Boolean {
+fun updateResultName(id: String, name: String): Boolean {
     val result = findResultById(id)
     result.name = name
     upsertResult(result)
@@ -38,25 +33,28 @@ fun saveResult(result: Result): Boolean {
     return true
 }
 
-fun deleteResult(id: UUID): Boolean {
+fun deleteResult(id: String): Boolean {
     val result = findResultById(id)
     deleteResult(result)
     return true
 }
 
-fun createResult(detailedContainerList: List<DetailedContainer>, remainedCableList: List<SimpleCable>, cableList: List<Cable>): Result {
-    val simpleContainerInfoList = detailedContainerList.groupBy { detailedContainer ->
-        detailedContainer.container.name
-    }.map { entry ->
+fun createResult(detailedContainerList: List<DetailedContainer>, remainedCableList: List<SimpleCable>,
+                 cableList: List<Cable>, containerList: List<Container>): Result {
+    val detailedContainerMap = detailedContainerList.groupBy { detailedContainer ->
+        detailedContainer.container.id
+    }
+    val simpleContainerInfoList = containerList.map { container ->
         SimpleContainerInfo(
-            name = entry.key,
-            count = entry.value.size,
-            container = entry.value[0].container
+            name = container.name,
+            container = container,
+            count = detailedContainerMap.getOrDefault(container.id, emptyList()).size
         )
     }
 
+
     return Result(
-        id = UUID.randomUUID(),
+        id = UUID.randomUUID().toString(),
         name = convertTimeToString(LocalDateTime.now()),
         detailedContainerList = detailedContainerList,
         remainedCableList = remainedCableList,

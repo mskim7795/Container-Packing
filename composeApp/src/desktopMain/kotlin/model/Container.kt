@@ -1,6 +1,8 @@
 package model
 
+import exception.EmptyDocumentException
 import org.dizitart.kno2.documentOf
+import org.dizitart.kno2.isEmpty
 import org.dizitart.no2.collection.Document
 import org.dizitart.no2.common.mapper.EntityConverter
 import org.dizitart.no2.common.mapper.NitriteMapper
@@ -12,7 +14,8 @@ import java.util.UUID
 data class Container(
 
     @Id
-    val id: UUID = UUID.randomUUID(),
+    val id: String = UUID.randomUUID().toString(),
+
     val name: String = "",
     val width: Int = 0,
     val length: Int = 0,
@@ -33,29 +36,32 @@ data class Container(
 
         override fun toDocument(container: Container, nitriteMapper: NitriteMapper): Document {
             return documentOf(
-                "id" to container.id.toString(),
+                "id" to container.id,
                 "name" to container.name,
-                "width" to container.width,
-                "length" to container.length,
-                "height" to container.height,
-                "weight" to container.weight,
-                "cost" to container.cost,
-                "count" to container.count,
-                "createdTime" to container.createdTime,
+                "width" to container.width.toString(),
+                "length" to container.length.toString(),
+                "height" to container.height.toString(),
+                "weight" to container.weight.toString(),
+                "cost" to container.cost.toString(),
+                "count" to container.count.toString(),
+                "createdTime" to container.createdTime.toString(),
             )
         }
 
         override fun fromDocument(document: Document, nitriteMapper: NitriteMapper): Container {
+            if (document.isEmpty()) {
+                return Container()
+            }
             return Container(
-                UUID.fromString(document.get("id", String::class.java)),
+                document.get("id", String::class.java),
                 document.get("name", String::class.java),
-                document.get("width", Int::class.java),
-                document.get("length", Int::class.java),
-                document.get("height", Int::class.java),
-                document.get("weight", Int::class.java),
-                document.get("cost", Int::class.java),
-                document.get("count", Int::class.java),
-                document.get("createdTime", Long::class.java),
+                document.get("width", String::class.java).toInt(),
+                document.get("length", String::class.java).toInt(),
+                document.get("height", String::class.java).toInt(),
+                document.get("weight", String::class.java).toInt(),
+                document.get("cost", String::class.java).toInt(),
+                document.get("count", String::class.java).toInt(),
+                document.get("createdTime", String::class.java).toLong(),
             )
         }
     }

@@ -1,22 +1,21 @@
 package Repository
 
 import model.Result
-import java.util.UUID
 
-private val resultRepository = NitriteManager.getInstance().getResultRepository()
+private val nitriteManager = NitriteManager.getInstance()
 
 fun upsertResult(result: Result) {
-    resultRepository.update(result, true)
+    nitriteManager.getResultRepository().update(result, true)
 }
 
-fun findResultById(id: UUID): Result {
-    return resultRepository.getById(id)
+fun findResultById(id: String): Result {
+    return nitriteManager.getResultRepository().getById(id)
 }
 
 fun findResult(): List<Result> {
-    return resultRepository.find().toList()
+    return nitriteManager.getResultRepository().find().toList()
 }
 
 fun deleteResult(result: Result) {
-    resultRepository.remove(result)
+    nitriteManager.getResultRepository().remove(result)
 }

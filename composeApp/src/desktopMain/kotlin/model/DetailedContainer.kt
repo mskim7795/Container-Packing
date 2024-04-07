@@ -5,7 +5,6 @@ import org.dizitart.no2.collection.Document
 import org.dizitart.no2.common.mapper.EntityConverter
 import org.dizitart.no2.common.mapper.NitriteMapper
 import java.util.TreeSet
-import java.util.UUID
 
 data class DetailedContainer(
     val container: Container,
@@ -26,14 +25,14 @@ data class DetailedContainer(
             val documentSimpleCableList = document.get("simpleCableList", List::class.java) as List<Document>
             val simpleCableList = documentSimpleCableList.map { d: Document ->
                 nitriteMapper.tryConvert(
-                    d.get("simpleCable", Document::class.java),
+                    d,
                     SimpleCable::class.java
                 ) as SimpleCable
             }.toMutableList()
             val documentUsedRectangleList = document.get("usedRectangleList", List::class.java) as List<Document>
             val usedRectangleList = documentUsedRectangleList.map { d ->
                 nitriteMapper.tryConvert(
-                    d.get("rectangle", Document::class.java),
+                    d,
                     Rectangle::class.java
                 ) as Rectangle
             }.toMutableList()
@@ -41,14 +40,14 @@ data class DetailedContainer(
             val freeRectangleSet = TreeSet<Rectangle>()
             documentFreeRetangleList.map { d ->
                 nitriteMapper.tryConvert(
-                    d.get("rectangle", Document::class.java), Rectangle::class.java
+                    d, Rectangle::class.java
                 ) as Rectangle
             }.forEach { rectangle ->
                 freeRectangleSet.add(rectangle)
             }
             return DetailedContainer(
                 container = container,
-                totalWeight = document.get("totalWeight", Int::class.java),
+                totalWeight = document.get("totalWeight", String::class.java).toInt(),
                 simpleCableList = simpleCableList,
                 usedRectangleList = usedRectangleList,
                 freeRectangleSet = freeRectangleSet
@@ -68,7 +67,7 @@ data class DetailedContainer(
             }
             return documentOf(
                 "container" to container,
-                "totalWeight" to detailedContainer.totalWeight,
+                "totalWeight" to detailedContainer.totalWeight.toString(),
                 "simpleCableList" to simpleCableList,
                 "usedRectangleList" to usedRectangleList,
                 "freeRectangleSet" to freeRectangleSet

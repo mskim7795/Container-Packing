@@ -1,22 +1,27 @@
 package Repository
 
+import exception.EmptyDocumentException
 import model.Container
-import java.util.UUID
+import org.dizitart.no2.filters.Filter
 
-private val containerRepository = NitriteManager.getInstance().getContainerRepository()
+private val nitriteManager = NitriteManager.getInstance()
 
 fun upsertContainer(container: Container) {
-    containerRepository.update(container, true)
+    nitriteManager.getContainerRepository().update(container, true)
 }
 
-fun findContainerById(id: UUID): Container {
-    return containerRepository.getById(id)
+fun findContainerById(id: String): Container {
+    return nitriteManager.getContainerRepository().getById(id)
 }
 
 fun findContainerList(): List<Container> {
-    return containerRepository.find().toList()
+    return try {
+        nitriteManager.getContainerRepository().find(Filter.ALL).toList()
+    } catch (e: EmptyDocumentException) {
+        emptyList()
+    }
 }
 
 fun deleteContainer(container: Container) {
-    containerRepository.remove(container)
+    nitriteManager.getContainerRepository().remove(container)
 }

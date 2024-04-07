@@ -159,6 +159,30 @@ fun saveContainerView(screenStack: SnapshotStateList<ScreenView>) {
 
                         Box(Modifier.weight(2f)) {
                             OutlinedTextField(
+                                value = containerState.length.toString(),
+                                onValueChange = {value ->
+                                    errorMap[text] = !isNonNegativeInteger(value) || (value.length > 4)
+                                    if (errorMap[text] != true) {
+                                        containerState.length = value.toIntOrNull() ?: 0
+                                    }
+                                },
+                                modifier = Modifier.fillMaxSize(),
+                            )
+                        }
+
+                        createUnitView(Modifier.weight(0.2f), "mm")
+                    }
+
+                    Spacer(modifier = Modifier.height(2.dp))
+
+                    Row(
+                        Modifier.weight(1f).border(1.dp, Color.Black)
+                    ) {
+                        val text = "height"
+                        createFieldView(Modifier.weight(1f).align(Alignment.CenterVertically), text, 10f)
+
+                        Box(Modifier.weight(2f)) {
+                            OutlinedTextField(
                                 value = containerState.height.toString(),
                                 onValueChange = {value ->
                                     errorMap[text] = !isNonNegativeInteger(value) || (value.length > 4)

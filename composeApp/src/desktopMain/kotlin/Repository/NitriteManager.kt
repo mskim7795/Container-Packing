@@ -29,17 +29,15 @@ class NitriteManager private constructor() {
         val storeModule = MVStoreModule.withConfig()
             .filePath("${rootPath}/container_packing.db")
             .build()
-        val nitriteMapper = SimpleNitriteMapper()
-        nitriteMapper.registerEntityConverter(Cable.Converter)
-        nitriteMapper.registerEntityConverter(Container.Converter)
-        nitriteMapper.registerEntityConverter(DetailedContainer.Converter)
-        nitriteMapper.registerEntityConverter(Rectangle.Converter)
-        nitriteMapper.registerEntityConverter(Result.Converter)
-        nitriteMapper.registerEntityConverter(SimpleCable.Converter)
-        nitriteMapper.registerEntityConverter(SimpleContainerInfo.Converter)
         db = nitrite {
             loadModule(storeModule)
-            loadModule(module(nitriteMapper))
+            registerEntityConverter(Cable.Converter)
+            registerEntityConverter(Container.Converter)
+            registerEntityConverter(DetailedContainer.Converter)
+            registerEntityConverter(Rectangle.Converter)
+            registerEntityConverter(Result.Converter)
+            registerEntityConverter(SimpleCable.Converter)
+            registerEntityConverter(SimpleContainerInfo.Converter)
         }
     }
 
@@ -47,14 +45,14 @@ class NitriteManager private constructor() {
         if (db == null){
             openDb()
         }
-        return db?.getRepository<Container>() ?: throw RuntimeException("failed to find db")
+        return db?.getRepository(Container::class.java) ?: throw RuntimeException("failed to find db")
     }
 
     fun getResultRepository(): ObjectRepository<Result> {
         if (db == null){
             openDb()
         }
-        return db?.getRepository<Result>() ?: throw RuntimeException("failed to find db")
+        return db?.getRepository() ?: throw RuntimeException("failed to find db")
     }
 
     companion object {

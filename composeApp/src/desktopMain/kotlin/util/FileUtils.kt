@@ -3,8 +3,13 @@ package util
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import model.Package
+import org.apache.poi.xssf.usermodel.XSSFWorkbook
+import java.awt.FileDialog
+import java.awt.Frame
 import java.io.File
-import java.sql.DriverManager
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.nio.channels.FileChannel
 import java.util.stream.Collectors
 
 val gson = Gson()
@@ -26,14 +31,41 @@ fun initializeRootFolder() {
     }
 
     Package.entries.forEach {
-        val packageDirectory = File("${rootPath}/${it}/list")
+        val packageDirectory = File("${rootPath}/${it}")
         if (!packageDirectory.exists()) {
             packageDirectory.mkdirs()
-            val indexFile = File("${rootPath}/${it}/index.json")
-            val emptyJson = """[]"""
-            indexFile.createNewFile()
-            indexFile.writeText(emptyJson)
         }
+    }
+}
+
+fun saveResultExcelFile(workbook: XSSFWorkbook, name: String) {
+    val fileOutputStream = FileOutputStream(File("${rootPath}/${Package.RESULT}", "${name}.xlsx"))
+    workbook.write(fileOutputStream)
+    fileOutputStream.close()
+}
+
+fun chooseSavePath(): String? {
+    val fileDialog = FileDialog(Frame(), "Save File", FileDialog.SAVE)
+    fileDialog.isVisible = true
+    val directory = fileDialog.directory
+    val filename = fileDialog.file
+    return if (directory != null && filename != null) {
+        "$directory${filename}.xlsx"
+    } else {
+        null
+    }
+}
+
+fun downloadResultFile(name: String, savePath: String) {
+    val sourceFile = File("${rootPath}/${Package.RESULT}", "${name}.xlsx")
+    val destinationFile = File(savePath)
+
+    if (sourceFile.exists()) {
+        val inputChannel: FileChannel = FileInputStream(sourceFile).channel
+        val outputChannel: FileChannel = FileOutputStream(destinationFile).channel
+        outputChannel.transferFrom(inputChannel, 0, inputChannel.size())
+        inputChannel.close()
+        outputChannel.close()
     }
 }
 

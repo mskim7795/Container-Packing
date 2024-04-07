@@ -6,9 +6,9 @@ import org.dizitart.no2.common.mapper.EntityConverter
 import org.dizitart.no2.common.mapper.NitriteMapper
 
 data class SimpleCable(
-    val id: Int = 1,
-    val name: String = "",
-    var count: Int = 1,
+    val id: String,
+    val name: String,
+    var count: Int,
 ) {
 
     companion object Converter: EntityConverter<SimpleCable> {
@@ -18,9 +18,9 @@ data class SimpleCable(
 
         override fun fromDocument(document: Document, nitriteMapper: NitriteMapper): SimpleCable {
             return SimpleCable(
-                id = document?.get("id", Int::class.java) ?: throw RuntimeException("failed to load SimpleCable"),
-                name = document.get("name", String::class.java) ?: throw RuntimeException("failed to load SimpleCable"),
-                count = document.get("count", Int::class.java)
+                id = document.get("id", String::class.java),
+                name = document.get("name", String::class.java),
+                count = document.get("count", String::class.java).toInt()
             )
         }
 
@@ -28,7 +28,7 @@ data class SimpleCable(
             return documentOf(
                 "id" to simpleCable.id,
                 "name" to simpleCable.name,
-                "count" to simpleCable.count
+                "count" to simpleCable.count.toString()
             )
         }
 

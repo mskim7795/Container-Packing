@@ -7,7 +7,7 @@ import model.Container
 import java.util.*
 
 class ContainerState (
-    id: UUID = UUID.randomUUID(),
+    id: String = UUID.randomUUID().toString(),
     name: String = "",
     width: Int = 0,
     length: Int = 0,
@@ -43,7 +43,7 @@ class ContainerState (
 
     fun toContainer(): Container {
         return Container(
-            id = UUID.randomUUID(),
+            id = id,
             name = name,
             width = width,
             length = length,

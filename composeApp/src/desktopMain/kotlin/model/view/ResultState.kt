@@ -4,10 +4,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import model.Result
-import java.util.UUID
 
 class ResultState(
-    id: UUID,
+    id: String,
     name: String,
     detailedContainerStateList: List<DetailedContainerState>,
     remainedCableStateList: List<SimpleCableState>

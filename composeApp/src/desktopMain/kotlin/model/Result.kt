@@ -1,6 +1,7 @@
 package model
 
 import org.dizitart.kno2.documentOf
+import org.dizitart.kno2.isEmpty
 import org.dizitart.no2.collection.Document
 import org.dizitart.no2.common.mapper.EntityConverter
 import org.dizitart.no2.common.mapper.NitriteMapper
@@ -15,7 +16,7 @@ private val logger = LoggerFactory.getLogger("Result")
 data class Result(
 
     @Id
-    val id: UUID,
+    val id: String = UUID.randomUUID().toString(),
     val detailedContainerList: List<DetailedContainer> = emptyList(),
     val remainedCableList: List<SimpleCable> = emptyList(),
     var name: String = "",
@@ -28,36 +29,34 @@ data class Result(
         }
 
         override fun fromDocument(document: Document, nitriteMapper: NitriteMapper): Result {
+            if (document.isEmpty()) {
+                return Result()
+            }
             val documentDetailedContainerList =
-                nitriteMapper.tryConvert("detailedContainerList", List::class.java) as List<Document>
+                document.get("detailedContainerList", List::class.java) as List<Document>
             val detailedContainerList = documentDetailedContainerList.map { d ->
                 nitriteMapper.tryConvert(
-                    d.get("detailedContainer", Document::class.java),
-                    DetailedContainer::class.java
+                    d, DetailedContainer::class.java
                 ) as DetailedContainer
             }
             val documentRemainedCableList =
-                nitriteMapper.tryConvert("remainedCableList", List::class.java) as List<Document>
+                document.get("remainedCableList", List::class.java) as List<Document>
             val remainedCableList = documentRemainedCableList.map { d ->
-                nitriteMapper.tryConvert(d.get("remainedCable", Document::class.java),
-                    SimpleCable::class.java) as SimpleCable
+                nitriteMapper.tryConvert(d, SimpleCable::class.java) as SimpleCable
             }
             val documentSimpleContainerInfoList =
-                nitriteMapper.tryConvert("simpleContainerInfoList", List::class.java) as List<Document>
+                document.get("simpleContainerInfoList", List::class.java) as List<Document>
             val simpleContainerInfoList = documentSimpleContainerInfoList.map { d ->
                 nitriteMapper.tryConvert(
-                    d.get(
-                        "simpleContainerInfo",
-                        Document::class.java
-                    ), SimpleContainerInfo::class.java
+                    d, SimpleContainerInfo::class.java
                 ) as SimpleContainerInfo
             }
-            val documentCableList = nitriteMapper.tryConvert("cableList", List::class.java) as List<Document>
+            val documentCableList = document.get("cableList", List::class.java) as List<Document>
             val cableList = documentCableList.map { d ->
-                nitriteMapper.tryConvert(d.get("cable", Document::class.java), Cable::class.java) as Cable
+                nitriteMapper.tryConvert(d, Cable::class.java) as Cable
             }
             return Result(
-                id = UUID.fromString(document.get("id", String::class.java) as String),
+                id = document.get("id", String::class.java),
                 detailedContainerList = detailedContainerList,
                 remainedCableList = remainedCableList,
                 name = document.get("name", String::class.java),
@@ -68,19 +67,19 @@ data class Result(
 
         override fun toDocument(result: Result, nitriteMapper: NitriteMapper): Document {
             val documentDetailedContainerList = result.detailedContainerList.map { detailedContainer ->
-                nitriteMapper.tryConvert("detailedContainer", Document::class.java) as Document
+                nitriteMapper.tryConvert(detailedContainer, Document::class.java) as Document
             }
             val documentRemainedCableList = result.remainedCableList.map { simpleCable ->
-                nitriteMapper.tryConvert("simpleCable", Document::class.java) as Document
+                nitriteMapper.tryConvert(simpleCable, Document::class.java) as Document
             }
             val documentSimpleContainerInfoList = result.simpleContainerInfoList.map { simpleContainerInfo ->
-                nitriteMapper.tryConvert("simpleContainerInfo", Document::class.java) as Document
+                nitriteMapper.tryConvert(simpleContainerInfo, Document::class.java) as Document
             }
             val documentCableList = result.cableList.map { cable ->
-                nitriteMapper.tryConvert("cable", Document::class.java) as Document
+                nitriteMapper.tryConvert(cable, Document::class.java) as Document
             }
             return documentOf(
-                "id" to result.id.toString(),
+                "id" to result.id,
                 "detailedContainerList" to documentDetailedContainerList,
                 "remainedCableList" to documentRemainedCableList,
                 "name" to result.name,

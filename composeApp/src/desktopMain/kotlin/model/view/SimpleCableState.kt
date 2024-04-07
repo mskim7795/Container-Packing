@@ -6,7 +6,7 @@ import androidx.compose.runtime.setValue
 import model.SimpleCable
 
 class SimpleCableState(
-    id: Int = 1,
+    id: String,
     name: String = "",
     count: Int = 1,
 ) {

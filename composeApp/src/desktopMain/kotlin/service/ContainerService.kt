@@ -5,12 +5,10 @@ import Repository.findContainerList
 import Repository.upsertContainer
 import model.Container
 import model.DetailedContainer
-import model.Package
 import model.Rectangle
 import model.view.ContainerState
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import util.loadItem
 import java.util.*
 
 private val logger: Logger = LoggerFactory.getLogger("ContainerService")
@@ -21,7 +19,7 @@ fun convertToDetailedContainerList(containerList: List<Container>): List<Detaile
             for (i: Int in 1..container.count) {
                 newContainerList.add(
                     Container(
-                        id = UUID.randomUUID(),
+                        id = container.id,
                         name = container.name,
                         width = container.width,
                         length = container.length,
@@ -53,8 +51,8 @@ fun findContainerList(): List<ContainerState> {
         .map(ContainerState.Companion::create)
 }
 
-fun findContainerState(name: String): ContainerState {
-    return ContainerState.create(loadItem<Container>(Package.CONTAINER, name))
+fun findContainerState(id: String): ContainerState {
+    return ContainerState.create(findContainerById(id))
 }
 
 fun updateContainer(container: Container): Boolean {
@@ -67,7 +65,7 @@ fun saveContainer(container: Container): Boolean {
     return true
 }
 
-fun deleteContainer(id: UUID): Boolean {
+fun deleteContainer(id: String): Boolean {
     val container = findContainerById(id)
     Repository.deleteContainer(container)
     return true

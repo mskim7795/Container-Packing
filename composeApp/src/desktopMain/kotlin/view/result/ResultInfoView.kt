@@ -36,11 +36,12 @@ import service.deleteResult
 import service.loadResultState
 import service.updateResultName
 import topAppBar
-import java.util.UUID
+import util.chooseSavePath
+import util.downloadResultFile
 
 @Composable
 fun loadResultInfoView(screenStack: SnapshotStateList<ScreenView>) {
-    val resultState = remember { loadResultState(UUID.fromString(screenStack.last().itemId)) }
+    val resultState = remember { loadResultState(screenStack.last().itemId) }
     val scaffoldState = rememberScaffoldState()
     val scope = rememberCoroutineScope()
     var canEdit by remember { mutableStateOf(false) }
@@ -109,6 +110,23 @@ fun loadResultInfoView(screenStack: SnapshotStateList<ScreenView>) {
                         }
                     ) {
                         Text("Delete")
+                    }
+                    Button(
+                        onClick = {
+                            scope.launch {
+                                try {
+                                    val savePath = chooseSavePath() ?: return@launch
+                                    downloadResultFile(resultState.id, savePath)
+                                } catch (e: Exception) {
+                                    scaffoldState.snackbarHostState.showSnackbar(
+                                        message = "Unexpected error",
+                                        actionLabel = "Go Back",
+                                    )
+                                }
+                            }
+                        }
+                    ) {
+                        Text("Download Excel")
                     }
                 }
             },

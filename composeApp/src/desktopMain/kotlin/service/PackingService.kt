@@ -23,7 +23,9 @@ fun calculateTwoDimensionalPacking(containerList: List<Container>, cableList: Li
             }
         }
     }
-    return createResult(detailedContainerList, remainedCableList, cableList)
+    val result = createResult(detailedContainerList, remainedCableList, cableList, containerList)
+    saveExcelWithResult(result)
+    return result
 }
 
 private fun splitFreeRectangle(freeRectangle: Rectangle, usedRectangle: Rectangle): List<Rectangle> {
