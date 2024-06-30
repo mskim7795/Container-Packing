@@ -49,13 +49,13 @@ import model.Screen
 import model.ScreenView
 import model.view.CableState
 import model.view.ContainerState
-import service.calculateTwoDimensionalPacking
-import service.hasDuplicatedNames
-import service.findContainerList
-import service.saveResult
+import service.*
 import topAppBar
 import view.createFieldView
-import view.isNonNegativeInteger
+import java.awt.FileDialog
+import java.awt.Frame
+import java.io.File
+import java.io.FileInputStream
 import java.util.UUID
 
 @Composable
@@ -107,7 +107,7 @@ fun createNewConditionView(screenStack: SnapshotStateList<ScreenView>) {
                                 } else {
                                     val result = calculateTwoDimensionalPacking(
                                         selectedContainerList.value.map(ContainerState::toContainer),
-                                        cableStateMutableList.map(CableState::toCable)
+                                        cableList
                                     )
                                     saveResult(result)
                                     screenStack.clear()
@@ -200,139 +200,167 @@ fun createNewConditionView(screenStack: SnapshotStateList<ScreenView>) {
                         modifier = Modifier.fillMaxSize().weight(1f).border(1.dp, Color.Black).background(Color.Gray)
                     )
 
-
-                    Row(
-                        modifier = Modifier.fillMaxSize().weight(1f).border(1.dp, Color.Black).background(Color.Gray)
-                    ) {
-                        createFieldView(Modifier.weight(1f).border(1.dp, Color.Black), "name", 10f)
-                        createFieldView(Modifier.weight(1f).border(1.dp, Color.Black), "width(mm)", 10f)
-                        createFieldView(Modifier.weight(1f).border(1.dp, Color.Black), "length(mm)", 10f)
-                        createFieldView(Modifier.weight(1f).border(1.dp, Color.Black), "height(mm)", 10f)
-                        createFieldView(Modifier.weight(1f).border(1.dp, Color.Black), "weight(mm)", 10f)
-                        createFieldView(Modifier.weight(1f).border(1.dp, Color.Black), "count", 10f)
-                        createFieldView(Modifier.weight(1f).border(1.dp, Color.Black), "delete", 10f)
-                    }
-
-                    Box(Modifier.fillMaxSize().weight(8f).border(1.dp, Color.Black)) {
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
-                            state = lazyCableListState
-                        ) {
-                            itemsIndexed(cableStateMutableList) { index, item ->
-                                Row(
-                                    Modifier.border(1.dp, Color.Black)
-                                ) {
-
-                                    Box(Modifier.weight(2f).border(1.dp, Color.Black)) {
-                                        OutlinedTextField(
-                                            value = item.name,
-                                            onValueChange = { value ->
-                                                if (value.isNotBlank() && (value.length <= 30)) {
-                                                    item.name = value
-                                                } else {
-                                                    forceRefresh++
-                                                }
-                                            },
-                                            singleLine = true,
-                                            modifier = Modifier.fillMaxSize()
-                                        )
-                                    }
-
-                                    Box(Modifier.weight(2f).border(1.dp, Color.Black)) {
-                                        OutlinedTextField(
-                                            value = item.width.toString(),
-                                            onValueChange = { value ->
-                                                if (isNonNegativeInteger(value) && (value.length < 6)) {
-                                                    item.width = value.toIntOrNull()?: 0
-                                                } else {
-                                                    forceRefresh++
-                                                }
-                                            },
-                                            singleLine = true,
-                                            modifier = Modifier.fillMaxSize()
-                                        )
-                                    }
-
-                                    Box(Modifier.weight(2f).border(1.dp, Color.Black)) {
-                                        OutlinedTextField(
-                                            value = item.length.toString(),
-                                            onValueChange = { value ->
-                                                if (isNonNegativeInteger(value) && (value.length < 5)) {
-                                                    item.length = value.toIntOrNull()?: 0
-                                                } else {
-                                                    forceRefresh++
-                                                }
-                                            },
-                                            singleLine = true,
-                                            modifier = Modifier.fillMaxSize()
-                                        )
-                                    }
-
-                                    Box(Modifier.weight(2f).border(1.dp, Color.Black)) {
-                                        OutlinedTextField(
-                                            value = item.height.toString(),
-                                            onValueChange = { value ->
-                                                if (isNonNegativeInteger(value) && (value.length < 5)) {
-                                                    item.height = value.toIntOrNull()?: 0
-                                                } else {
-                                                    forceRefresh++
-                                                }
-                                            },
-                                            singleLine = true,
-                                            modifier = Modifier.fillMaxSize()
-                                        )
-                                    }
-
-                                    Box(Modifier.weight(2f).border(1.dp, Color.Black)) {
-                                        OutlinedTextField(
-                                            value = item.weight.toString(),
-                                            onValueChange = { value ->
-                                                if (isNonNegativeInteger(value) && (value.length < 6)) {
-                                                    item.weight = value.toIntOrNull()?: 0
-                                                } else {
-                                                    forceRefresh++
-                                                }
-                                            },
-                                            singleLine = true,
-                                            modifier = Modifier.fillMaxSize()
-                                        )
-                                    }
-
-                                    Box(Modifier.weight(2f)) {
-                                        OutlinedTextField(
-                                            value = item.count.toString(),
-                                            onValueChange = { value ->
-                                                if (isNonNegativeInteger(value) && (value.length < 4)) {
-                                                    item.count = value.toIntOrNull()?: 1
-                                                } else {
-                                                    forceRefresh++
-                                                }
-                                            },
-                                            singleLine = true,
-                                            modifier = Modifier.fillMaxSize()
-                                        )
-                                    }
-
-                                    Box(Modifier.weight(2f)) {
-                                        IconButton(
-                                            onClick = {
-                                                cableStateMutableList.removeAt(index)
-                                            }
-                                        ) {
-                                            Icon(Icons.Default.Delete, contentDescription = "Delete")
-                                        }
+                    Column(modifier = Modifier.fillMaxSize().weight(1f)) {
+                        Button(onClick = {
+                            scope.launch {
+                                val file = chooseFile()
+                                file?.let {
+                                    val inputStream = FileInputStream(it)
+                                    cableStateMutableList.clear()
+                                    convertCableListFromExcel(inputStream).forEach { cable ->
+                                        cableStateMutableList.add(CableState.create(cable))
                                     }
                                 }
+                                scaffoldState.snackbarHostState.showSnackbar(
+                                    message = "Success",
+                                    actionLabel = "Ok"
+                                )
                             }
+                        }) {
+                            Text("Upload Excel File")
                         }
-
-                        VerticalScrollbar(
-                            modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
-                            adapter = rememberScrollbarAdapter(scrollState = lazyCableListState)
-                        )
                     }
+
+
+//                    Row(
+//                        modifier = Modifier.fillMaxSize().weight(1f).border(1.dp, Color.Black).background(Color.Gray)
+//                    ) {
+//                        createFieldView(Modifier.weight(1f).border(1.dp, Color.Black), "name", 10f)
+//                        createFieldView(Modifier.weight(1f).border(1.dp, Color.Black), "width(mm)", 10f)
+//                        createFieldView(Modifier.weight(1f).border(1.dp, Color.Black), "length(mm)", 10f)
+//                        createFieldView(Modifier.weight(1f).border(1.dp, Color.Black), "height(mm)", 10f)
+//                        createFieldView(Modifier.weight(1f).border(1.dp, Color.Black), "weight(mm)", 10f)
+//                        createFieldView(Modifier.weight(1f).border(1.dp, Color.Black), "count", 10f)
+//                        createFieldView(Modifier.weight(1f).border(1.dp, Color.Black), "delete", 10f)
+//                    }
+//
+//                    Box(Modifier.fillMaxSize().weight(8f).border(1.dp, Color.Black)) {
+//                        LazyColumn(
+//                            modifier = Modifier.fillMaxSize(),
+//                            state = lazyCableListState
+//                        ) {
+//                            itemsIndexed(cableStateMutableList) { index, item ->
+//                                Row(
+//                                    Modifier.border(1.dp, Color.Black)
+//                                ) {
+//
+//                                    Box(Modifier.weight(2f).border(1.dp, Color.Black)) {
+//                                        OutlinedTextField(
+//                                            value = item.name,
+//                                            onValueChange = { value ->
+//                                                if (value.isNotBlank() && (value.length <= 30)) {
+//                                                    item.name = value
+//                                                } else {
+//                                                    forceRefresh++
+//                                                }
+//                                            },
+//                                            singleLine = true,
+//                                            modifier = Modifier.fillMaxSize()
+//                                        )
+//                                    }
+//
+//                                    Box(Modifier.weight(2f).border(1.dp, Color.Black)) {
+//                                        OutlinedTextField(
+//                                            value = item.width.toString(),
+//                                            onValueChange = { value ->
+//                                                if (isNonNegativeInteger(value) && (value.length < 6)) {
+//                                                    item.width = value.toIntOrNull()?: 0
+//                                                } else {
+//                                                    forceRefresh++
+//                                                }
+//                                            },
+//                                            singleLine = true,
+//                                            modifier = Modifier.fillMaxSize()
+//                                        )
+//                                    }
+//
+//                                    Box(Modifier.weight(2f).border(1.dp, Color.Black)) {
+//                                        OutlinedTextField(
+//                                            value = item.length.toString(),
+//                                            onValueChange = { value ->
+//                                                if (isNonNegativeInteger(value) && (value.length < 5)) {
+//                                                    item.length = value.toIntOrNull()?: 0
+//                                                } else {
+//                                                    forceRefresh++
+//                                                }
+//                                            },
+//                                            singleLine = true,
+//                                            modifier = Modifier.fillMaxSize()
+//                                        )
+//                                    }
+//
+//                                    Box(Modifier.weight(2f).border(1.dp, Color.Black)) {
+//                                        OutlinedTextField(
+//                                            value = item.height.toString(),
+//                                            onValueChange = { value ->
+//                                                if (isNonNegativeInteger(value) && (value.length < 5)) {
+//                                                    item.height = value.toIntOrNull()?: 0
+//                                                } else {
+//                                                    forceRefresh++
+//                                                }
+//                                            },
+//                                            singleLine = true,
+//                                            modifier = Modifier.fillMaxSize()
+//                                        )
+//                                    }
+//
+//                                    Box(Modifier.weight(2f).border(1.dp, Color.Black)) {
+//                                        OutlinedTextField(
+//                                            value = item.weight.toString(),
+//                                            onValueChange = { value ->
+//                                                if (isNonNegativeInteger(value) && (value.length < 6)) {
+//                                                    item.weight = value.toIntOrNull()?: 0
+//                                                } else {
+//                                                    forceRefresh++
+//                                                }
+//                                            },
+//                                            singleLine = true,
+//                                            modifier = Modifier.fillMaxSize()
+//                                        )
+//                                    }
+//
+//                                    Box(Modifier.weight(2f)) {
+//                                        OutlinedTextField(
+//                                            value = item.count.toString(),
+//                                            onValueChange = { value ->
+//                                                if (isNonNegativeInteger(value) && (value.length < 4)) {
+//                                                    item.count = value.toIntOrNull()?: 1
+//                                                } else {
+//                                                    forceRefresh++
+//                                                }
+//                                            },
+//                                            singleLine = true,
+//                                            modifier = Modifier.fillMaxSize()
+//                                        )
+//                                    }
+//
+//                                    Box(Modifier.weight(2f)) {
+//                                        IconButton(
+//                                            onClick = {
+//                                                cableStateMutableList.removeAt(index)
+//                                            }
+//                                        ) {
+//                                            Icon(Icons.Default.Delete, contentDescription = "Delete")
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                        }
+//
+//                        VerticalScrollbar(
+//                            modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
+//                            adapter = rememberScrollbarAdapter(scrollState = lazyCableListState)
+//                        )
+//                    }
                 }
             }
         }
     }
+}
+
+fun chooseFile(): File? {
+    val fileDialog = FileDialog(Frame(), "Select Excel File", FileDialog.LOAD)
+    fileDialog.isVisible = true
+    val selectedFile = fileDialog.file ?: return null
+    return File(fileDialog.directory, selectedFile)
 }
