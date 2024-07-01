@@ -26,7 +26,7 @@ data class Container(
     val createdTime: Long = -1
 ) {
     fun getAreaPerCost(): Double {
-        return length * height / cost.toDouble()
+        return width * length / cost.toDouble()
     }
 
     companion object Converter: EntityConverter<Container> {
