@@ -9,9 +9,12 @@ import org.apache.poi.xssf.usermodel.XSSFCellStyle
 import org.apache.poi.xssf.usermodel.XSSFRow
 import org.apache.poi.xssf.usermodel.XSSFSheet
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
+import org.slf4j.LoggerFactory
 import util.saveResultExcelFile
 import java.io.InputStream
+import kotlin.math.log
 
+private val logger = LoggerFactory.getLogger("ExcelService")
 private const val columnSize: Int = 2
 fun saveExcelWithResult(result: Result): Unit {
     val workbook = XSSFWorkbook()
@@ -176,8 +179,9 @@ fun convertCableListFromExcel(inputStream: InputStream): List<Cable> {
     val workbook = XSSFWorkbook(inputStream)
     val sheet = workbook.getSheetAt(0)
     val cableList = mutableListOf<Cable>()
-
-    for (rowIndex in 2 until findFirstEmptyRow(sheet)) {
+    val firstEmptyRow = findFirstEmptyRow(sheet)
+    logger.info("ExcelService;firstEmptyRow:{}", firstEmptyRow)
+    for (rowIndex in 2 until firstEmptyRow) {
         val row = sheet.getRow(rowIndex)
         System.currentTimeMillis()
         if (row != null) {
@@ -195,11 +199,12 @@ fun convertCableListFromExcel(inputStream: InputStream): List<Cable> {
             cableList.add(cable)
         }
     }
-
+    logger.info("ExcelService;cableList: {}", cableList.toString())
     return cableList.toList()
 }
 
 private fun findFirstEmptyRow(sheet: Sheet): Int {
+    logger.info("ExcelService;lastRowNum: {}", sheet.lastRowNum)
     for (rowIndex in 2..sheet.lastRowNum) {
         val row = sheet.getRow(rowIndex)
         if (row == null || isCellEmpty(row.getCell(1))) {

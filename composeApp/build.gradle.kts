@@ -27,8 +27,8 @@ kotlin {
                 implementation(compose.components.resources)
 
                 implementation("com.google.code.gson:gson:2.8.8")
-                implementation("org.slf4j:slf4j-api:1.7.30")
-                implementation("ch.qos.logback:logback-classic:1.2.3")
+                implementation("org.slf4j:slf4j-api:2.0.13")
+                implementation("ch.qos.logback:logback-classic:1.4.14")
                 implementation("org.apache.poi:poi-ooxml:5.2.3")
                 implementation(project.dependencies.platform("org.dizitart:nitrite-bom:4.2.2"))
                 implementation("org.dizitart:potassium-nitrite")
