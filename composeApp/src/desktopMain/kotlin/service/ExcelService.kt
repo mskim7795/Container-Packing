@@ -204,8 +204,7 @@ fun convertCableListFromExcel(inputStream: InputStream): List<Cable> {
 }
 
 private fun findFirstEmptyRow(sheet: Sheet): Int {
-    logger.info("ExcelService;lastRowNum: {}", sheet.lastRowNum)
-    for (rowIndex in 2..sheet.lastRowNum) {
+    for (rowIndex in 2..10000) {
         val row = sheet.getRow(rowIndex)
         if (row == null || isCellEmpty(row.getCell(1))) {
             return rowIndex
